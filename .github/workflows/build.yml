@@ -1,0 +1,22 @@
+name: Build iOS Dylib
+
+on:
+  push:
+    branches: [ main, master ]
+
+jobs:
+  build:
+  runs-on: macos-latest
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Compile dylib for iOS
+      run: |
+        clang -dynamiclib -arch arm64 main.mm -o custom_speed.dylib -framework Foundation -lobjc
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: custom_speed
+        path: custom_speed.dylib
