@@ -6,21 +6,14 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: macos-13
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install iOS Cross Compiler
+      - name: Compile dylib for iOS
         run: |
-          sudo apt-get update
-          sudo apt-get install -y clang llvm libssl-dev
-
-      - name: Compile dylib for iOS (ARM64)
-        run: |
-          clang -target arm64-apple-ios14.0 -dynamiclib main.mm -o custom_speed.dylib -fuse-ld=lld -isysroot /tmp || true
-          # 如果缺少 SDK 头文件，使用轻量生成模式
-          clang -target arm64-apple-ios -dynamiclib main.mm -o custom_speed.dylib -nostdlib -lc || clang -shared -o custom_speed.dylib main.mm
+          clang -dynamiclib -arch arm64 main.mm -o custom_speed.dylib -framework Foundation -lobjc
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
