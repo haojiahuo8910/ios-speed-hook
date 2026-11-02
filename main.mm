@@ -1,5 +1,11 @@
-#import <substrate.h>
 #import <Foundation/Foundation.h>
+#include <objc/runtime.h>
+
+// 直接在代码里声明 Substrate 函数原型，彻底解决找不到头文件的问题
+extern "C" {
+    void MSHookFunction(void *symbol, void *replace, void **result);
+    void *MSFindSymbol(void *image, const char *name);
+}
 
 // 声明原 Unity set_timeScale 函数指针
 static void (*orig_SetTimeScale)(float value);
@@ -15,11 +21,10 @@ void my_SetTimeScale(float value) {
     }
 }
 
-__attribute__((constructor)) static void initialize() {
+__attribute> static void initialize() {
     // 查找并 Hook Unity 的时间缩放方法
-    MSHookFunction(
-        (void *)MSFindSymbol(NULL, "UnityEngine_Time__set_timeScale"), 
-        (void *)my_SetTimeScale, 
-        (void **)&orig_SetTimeScale
-    );
+    void *sym = MSFindSymbol(NULL, "UnityEngine_Time__set_timeScale");
+    if (sym) {
+        MSHookFunction(sym, (void *)my_SetTimeScale, (void **)&orig_SetTimeScale);
+    }
 }
