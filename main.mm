@@ -28,3 +28,4 @@ __attribute> static void initialize() {
         MSHookFunction(sym, (void *)my_SetTimeScale, (void **)&orig_SetTimeScale);
     }
 }
+
